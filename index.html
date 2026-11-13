@@ -1,0 +1,507 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>شركة الفيروز للخدمات والرحلات الداخلية والخدمات الطلابية</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;900&display=swap');
+        body { font-family: 'Cairo', sans-serif; background-color: #f0fdfa; color: #134e4a; -webkit-tap-highlight-color: transparent; }
+        input, select, button { font-size: 16px !important; }
+    </style>
+</head>
+<body class="min-h-screen flex flex-col justify-between">
+
+    <!-- Header -->
+    <header class="bg-gradient-to-r from-teal-700 to-cyan-800 text-white shadow-lg sticky top-0 z-50">
+        <div class="max-w-4xl mx-auto px-4 py-4 flex flex-col sm:flex-row justify-between items-center gap-3">
+            <div class="flex items-center gap-3 text-center sm:text-right">
+                <div class="bg-white/10 p-3 rounded-2xl backdrop-blur-md">
+                    <i class="fa-solid fa-bus text-2xl text-cyan-200"></i>
+                </div>
+                <div>
+                    <h1 class="text-lg sm:text-xl font-bold tracking-wide">شركة الفيروز للخدمات والرحلات الداخلية والخدمات الطلابية</h1>
+                    <p class="text-xs text-cyan-200">حجوزات رحلات الطلاب اليومية - خط دسوق وكفر الشيخ</p>
+                </div>
+            </div>
+            <button onclick="toggleAdminModal()" class="bg-white/20 hover:bg-white/30 text-white px-4 py-2 rounded-xl text-sm font-semibold transition flex items-center gap-2 border border-white/20">
+                <i class="fa-solid fa-lock text-xs"></i> لوحة المشرفين
+            </button>
+        </div>
+    </header>
+
+    <!-- Main Container -->
+    <main class="max-w-2xl w-full mx-auto p-4 sm:p-6 my-auto flex-grow">
+        
+        <!-- Status Banner -->
+        <div id="statusBanner" class="mb-6 p-4 rounded-2xl bg-teal-100 border border-teal-200 text-teal-800 text-sm font-semibold flex items-center justify-between shadow-sm">
+            <div class="flex items-center gap-2">
+                <span class="w-3 h-3 bg-emerald-500 rounded-full animate-pulse inline-block"></span>
+                <span>باب الحجز مفتوح (تحديث تلقائي 4:59 عصراً)</span>
+            </div>
+            <span id="currentTime" class="text-xs font-mono bg-white px-2.5 py-1 rounded-lg text-teal-900 border border-teal-200"></span>
+        </div>
+
+        <!-- Booking Form Card -->
+        <div class="bg-white rounded-3xl shadow-xl p-6 sm:p-8 border border-teal-100">
+            <h2 class="text-xl font-bold text-teal-900 mb-6 pb-3 border-b border-teal-50 flex items-center gap-2">
+                <i class="fa-solid fa-ticket text-cyan-600"></i> استمارة حجز مقعد جديد
+            </h2>
+
+            <form id="bookingForm" onsubmit="handleBooking(event)" class="space-y-5">
+                <!-- Name -->
+                <div>
+                    <label class="block text-sm font-bold text-teal-900 mb-2">اسم الطالب بالكامل</label>
+                    <div class="relative">
+                        <span class="absolute right-4 top-3.5 text-teal-400"><i class="fa-solid fa-user"></i></span>
+                        <input type="text" id="studentName" required placeholder="أدخل اسمك الثلاثي أو الرباعي" 
+                            class="w-full pr-12 pl-4 py-3 bg-teal-50/50 border border-teal-200 rounded-2xl focus:outline-none focus:ring-2 focus:ring-teal-500 text-teal-900">
+                    </div>
+                </div>
+
+                <!-- Phone -->
+                <div>
+                    <label class="block text-sm font-bold text-teal-900 mb-2">رقم التليفون (للتواصل وواتساب)</label>
+                    <div class="relative">
+                        <span class="absolute right-4 top-3.5 text-teal-400"><i class="fa-solid fa-phone"></i></span>
+                        <input type="tel" id="studentPhone" required placeholder="010xxxxxxxx" pattern="01[0-9]{9}" 
+                            class="w-full pr-12 pl-4 py-3 bg-teal-50/50 border border-teal-200 rounded-2xl focus:outline-none focus:ring-2 focus:ring-teal-500 text-teal-900">
+                    </div>
+                </div>
+
+                <!-- Pickup Location -->
+                <div>
+                    <label class="block text-sm font-bold text-teal-900 mb-2">مكان الركوب من دسوق (قبل ميعاد المرواح)</label>
+                    <div class="relative">
+                        <span class="absolute right-4 top-3.5 text-teal-400"><i class="fa-solid fa-location-dot"></i></span>
+                        <select id="pickupLocation" required onchange="checkOtherLocation()" 
+                            class="w-full pr-12 pl-4 py-3 bg-teal-50/50 border border-teal-200 rounded-2xl focus:outline-none focus:ring-2 focus:ring-teal-500 text-teal-900">
+                            <option value="">اختر نقطة الركوب من دسوق</option>
+                            <option value="مكتب الرحلة">مكتب الرحلة</option>
+                            <option value="المبرة">المبرة</option>
+                            <option value="الفتحة">الفتحة</option>
+                            <option value="الأمومة">الأمومة</option>
+                            <option value="رنين">رنين</option>
+                            <option value="مستشفى الكلى عند مشتل">مستشفى الكلى عند مشتل</option>
+                            <option value="أي مكان تاني">أي مكان تاني</option>
+                        </select>
+                    </div>
+                </div>
+
+                <!-- Other Location Input -->
+                <div id="otherLocationWrapper" class="hidden">
+                    <label class="block text-sm font-bold text-teal-900 mb-2">اكتب مكان الركوب بالتفصيل</label>
+                    <input type="text" id="otherLocationText" placeholder="اكتب اسم الشارع أو العلامة المميزة" 
+                        class="w-full px-4 py-3 bg-teal-50/50 border border-teal-200 rounded-2xl focus:outline-none focus:ring-2 focus:ring-teal-500 text-teal-900">
+                </div>
+
+                <!-- Departure Time (المرواح) -->
+                <div>
+                    <label class="block text-sm font-bold text-teal-900 mb-2">ميعاد المرواح (من دسوق إلى كفر الشيخ)</label>
+                    <div class="grid grid-cols-2 sm:grid-cols-4 gap-2">
+                        <label class="border border-teal-200 rounded-2xl p-3 text-center cursor-pointer hover:bg-teal-50 transition has-[:checked]:bg-teal-600 has-[:checked]:text-white has-[:checked]:border-teal-600">
+                            <input type="radio" name="departureTime" value="6:30 الصبح" required class="sr-only">
+                            <span class="text-xs font-bold block">6:30 الصبح</span>
+                        </label>
+                        <label class="border border-teal-200 rounded-2xl p-3 text-center cursor-pointer hover:bg-teal-50 transition has-[:checked]:bg-teal-600 has-[:checked]:text-white has-[:checked]:border-teal-600">
+                            <input type="radio" name="departureTime" value="7:15 الصبح" class="sr-only">
+                            <span class="text-xs font-bold block">7:15 الصبح</span>
+                        </label>
+                        <label class="border border-teal-200 rounded-2xl p-3 text-center cursor-pointer hover:bg-teal-50 transition has-[:checked]:bg-teal-600 has-[:checked]:text-white has-[:checked]:border-teal-600">
+                            <input type="radio" name="departureTime" value="8:30 الصبح" class="sr-only">
+                            <span class="text-xs font-bold block">8:30 الصبح</span>
+                        </label>
+                        <label class="border border-teal-200 rounded-2xl p-3 text-center cursor-pointer hover:bg-teal-50 transition has-[:checked]:bg-teal-600 has-[:checked]:text-white has-[:checked]:border-teal-600">
+                            <input type="radio" name="departureTime" value="11:30 الصبح" class="sr-only">
+                            <span class="text-xs font-bold block">11:30 الصبح</span>
+                        </label>
+                    </div>
+                </div>
+
+                <!-- Return Time (المجيء) -->
+                <div>
+                    <label class="block text-sm font-bold text-teal-900 mb-2">ميعاد المجيء (الرجوع إلى دسوق)</label>
+                    <div class="grid grid-cols-2 sm:grid-cols-4 gap-2">
+                        <label class="border border-teal-200 rounded-2xl p-3 text-center cursor-pointer hover:bg-teal-50 transition has-[:checked]:bg-teal-600 has-[:checked]:text-white has-[:checked]:border-teal-600">
+                            <input type="radio" name="returnTime" value="قبل 12" required class="sr-only">
+                            <span class="text-xs font-bold block">قبل 12</span>
+                        </label>
+                        <label class="border border-teal-200 rounded-2xl p-3 text-center cursor-pointer hover:bg-teal-50 transition has-[:checked]:bg-teal-600 has-[:checked]:text-white has-[:checked]:border-teal-600">
+                            <input type="radio" name="returnTime" value="من 12 ل 2" class="sr-only">
+                            <span class="text-xs font-bold block">من 12 لـ 2</span>
+                        </label>
+                        <label class="border border-teal-200 rounded-2xl p-3 text-center cursor-pointer hover:bg-teal-50 transition has-[:checked]:bg-teal-600 has-[:checked]:text-white has-[:checked]:border-teal-600">
+                            <input type="radio" name="returnTime" value="من 2 ل 4" class="sr-only">
+                            <span class="text-xs font-bold block">من 2 لـ 4</span>
+                        </label>
+                        <label class="border border-teal-200 rounded-2xl p-3 text-center cursor-pointer hover:bg-teal-50 transition has-[:checked]:bg-teal-600 has-[:checked]:text-white has-[:checked]:border-teal-600">
+                            <input type="radio" name="returnTime" value="من 4 ل 5" class="sr-only">
+                            <span class="text-xs font-bold block">من 4 لـ 5</span>
+                        </label>
+                    </div>
+                </div>
+
+                <!-- Submit Button -->
+                <button type="submit" id="submitBtn" class="w-full bg-gradient-to-r from-teal-600 to-cyan-600 hover:from-teal-700 hover:to-cyan-700 text-white font-bold py-4 rounded-2xl shadow-lg shadow-teal-600/30 transition flex items-center justify-center gap-2">
+                    <i class="fa-solid fa-paper-plane"></i> تأكيد وإرسال الحجز
+                </button>
+            </form>
+        </div>
+    </main>
+
+    <!-- Admin Password Modal -->
+    <div id="adminModal" class="fixed inset-0 bg-black/60 backdrop-blur-sm hidden items-center justify-center z-50 p-4">
+        <div class="bg-white w-full max-w-sm rounded-3xl p-6 shadow-2xl border border-teal-100">
+            <div class="text-center mb-6">
+                <div class="w-14 h-14 bg-teal-100 text-teal-700 rounded-2xl flex items-center justify-center mx-auto mb-3 text-2xl">
+                    <i class="fa-solid fa-shield-halved"></i>
+                </div>
+                <h3 class="text-lg font-bold text-teal-900">لوحة المشرفين</h3>
+                <p class="text-xs text-teal-600">أدخل كلمة المرور للمتابعة</p>
+            </div>
+            <form onsubmit="verifyAdmin(event)" class="space-y-4">
+                <input type="password" id="adminPasswordInput" required placeholder="أدخل كلمة المرور" 
+                    class="w-full px-4 py-3 bg-teal-50/50 border border-teal-200 rounded-2xl text-center text-xl tracking-widest focus:outline-none focus:ring-2 focus:ring-teal-500">
+                <div class="flex gap-2">
+                    <button type="submit" class="flex-1 bg-teal-600 text-white font-bold py-3 rounded-2xl hover:bg-teal-700 transition">دخول</button>
+                    <button type="button" onclick="toggleAdminModal()" class="flex-1 bg-gray-100 text-gray-700 font-bold py-3 rounded-2xl hover:bg-gray-200 transition">إلغاء</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Admin Dashboard Modal -->
+    <div id="adminDashboard" class="fixed inset-0 bg-slate-900/90 backdrop-blur-md hidden z-50 flex flex-col">
+        <header class="bg-teal-800 text-white p-4 shadow-md flex justify-between items-center">
+            <div class="flex items-center gap-3">
+                <i class="fa-solid fa-cloud text-cyan-300 text-xl"></i>
+                <div>
+                    <h2 class="font-bold text-base">لوحة تحكم المشرفين - شركة الفيروز</h2>
+                    <p class="text-xs text-emerald-300" id="syncStatus">متصل بالسحابة المركزية لحظياً 🟢</p>
+                </div>
+            </div>
+            <div class="flex items-center gap-2">
+                <button onclick="renderAdminList()" class="bg-teal-600 hover:bg-teal-700 text-white px-3 py-2 rounded-xl text-xs font-semibold flex items-center gap-1.5">
+                    <i class="fa-solid fa-arrows-rotate"></i> تحديث
+                </button>
+                <button onclick="closeAdminDashboard()" class="bg-white/20 hover:bg-white/30 text-white p-2 rounded-xl text-sm">
+                    <i class="fa-solid fa-xmark"></i>
+                </button>
+            </div>
+        </header>
+
+        <div class="bg-teal-900 text-white px-4 py-3 flex flex-wrap gap-3 items-center justify-between border-b border-teal-800">
+            <div class="flex items-center gap-2 text-sm">
+                <span class="bg-cyan-600 px-3 py-1 rounded-xl font-bold" id="totalBookingsCount">0 حجز</span>
+                <span class="text-cyan-200 text-xs">كشف يوم: <span id="currentCycleDate"></span></span>
+            </div>
+            <div class="flex gap-2">
+                <button onclick="exportToWhatsApp()" class="bg-emerald-600 hover:bg-emerald-700 text-white px-3 py-1.5 rounded-xl text-xs font-bold flex items-center gap-1">
+                    <i class="fa-brands fa-whatsapp"></i> إرسال الكشف واتساب
+                </button>
+                <button onclick="resetDayManually()" class="bg-red-600/80 hover:bg-red-700 text-white px-3 py-1.5 rounded-xl text-xs font-bold flex items-center gap-1">
+                    <i class="fa-solid fa-trash"></i> تصفير يدوي
+                </button>
+            </div>
+        </div>
+
+        <!-- Filters -->
+        <div class="bg-white p-3 border-b border-gray-200 flex flex-wrap gap-2 items-center justify-between">
+            <div class="flex flex-wrap gap-2 items-center flex-grow">
+                <input type="text" id="searchInput" oninput="renderAdminList()" placeholder="بحث بالاسم أو الرقم..." 
+                    class="px-3 py-2 bg-gray-50 border border-gray-200 rounded-xl text-xs w-full sm:w-48">
+                <select id="filterDeparture" onchange="renderAdminList()" class="px-3 py-2 bg-gray-50 border border-gray-200 rounded-xl text-xs">
+                    <option value="">كل مواعيد المرواح</option>
+                    <option value="6:30 الصبح">6:30 الصبح</option>
+                    <option value="7:15 الصبح">7:15 الصبح</option>
+                    <option value="8:30 الصبح">8:30 الصبح</option>
+                    <option value="11:30 الصبح">11:30 الصبح</option>
+                </select>
+                <select id="filterReturn" onchange="renderAdminList()" class="px-3 py-2 bg-gray-50 border border-gray-200 rounded-xl text-xs">
+                    <option value="">كل مواعيد المجيء</option>
+                    <option value="قبل 12">قبل 12</option>
+                    <option value="من 12 ل 2">من 12 لـ 2</option>
+                    <option value="من 2 ل 4">من 2 لـ 4</option>
+                    <option value="من 4 ل 5">من 4 لـ 5</option>
+                </select>
+            </div>
+        </div>
+
+        <!-- List Container (Rectangles) -->
+        <div class="flex-grow overflow-y-auto p-4 max-w-4xl w-full mx-auto space-y-3" id="adminBookingsList">
+        </div>
+    </div>
+
+    <!-- Success Modal -->
+    <div id="successModal" class="fixed inset-0 bg-black/60 backdrop-blur-sm hidden items-center justify-center z-50 p-4">
+        <div class="bg-white w-full max-w-sm rounded-3xl p-6 text-center shadow-2xl border border-teal-100">
+            <div class="w-16 h-16 bg-emerald-100 text-emerald-600 rounded-full flex items-center justify-center mx-auto mb-4 text-3xl">
+                <i class="fa-solid fa-check"></i>
+            </div>
+            <h3 class="text-xl font-bold text-teal-900 mb-2">تم تسجيل حجوزك بنجاح!</h3>
+            <p class="text-sm text-gray-600 mb-6">تم إرسال بياناتك بنجاح إلى قاعدة بيانات شركة الفيروز وظهرت الآن في قائمة المشرفين.</p>
+            <button onclick="closeSuccessModal()" class="w-full bg-teal-600 hover:bg-teal-700 text-white font-bold py-3 rounded-2xl transition">حسناً، شكراً</button>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <footer class="text-center py-4 text-xs text-teal-700 bg-teal-50 border-t border-teal-100">
+        جميع الحقوق محفوظة © شركة الفيروز للخدمات والرحلات الداخلية والخدمات الطلابية 2026
+    </footer>
+
+    <!-- Script Logic: 100% Cloud Firebase Sync (Zero Local-Only Storage) -->
+    <script>
+        const FIREBASE_URL = "https://alfyroooz-995a3-default-rtdb.firebaseio.com";
+        
+        function getCairoDateString() {
+            const now = new Date();
+            const cairoTimeStr = now.toLocaleString("en-US", { timeZone: "Africa/Cairo" });
+            const cairoDate = new Date(cairoTimeStr);
+            const hours = cairoDate.getHours();
+            const minutes = cairoDate.getMinutes();
+            
+            // Auto-reset cycle at 4:59 PM (16:59) Cairo Time
+            let targetDate = new Date(cairoDate);
+            if (hours > 16 || (hours === 16 && minutes >= 59)) {
+                targetDate.setDate(targetDate.getDate() + 1);
+            }
+            const y = targetDate.getFullYear();
+            const m = String(targetDate.getMonth() + 1).padStart(2, '0');
+            const d = String(targetDate.getDate()).padStart(2, '0');
+            return `${y}-${m}-${d}`;
+        }
+
+        function updateClock() {
+            const now = new Date();
+            const cairoTimeStr = now.toLocaleTimeString("ar-EG", { timeZone: "Africa/Cairo", hour: '2-digit', minute: '2-digit', second: '2-digit' });
+            document.getElementById('currentTime').innerText = cairoTimeStr;
+            document.getElementById('currentCycleDate').innerText = getCairoDateString();
+        }
+        setInterval(updateClock, 1000);
+        updateClock();
+
+        function checkOtherLocation() {
+            const select = document.getElementById('pickupLocation');
+            const wrapper = document.getElementById('otherLocationWrapper');
+            if (select.value === 'أي مكان تاني') {
+                wrapper.classList.remove('hidden');
+                document.getElementById('otherLocationText').required = true;
+            } else {
+                wrapper.classList.add('hidden');
+                document.getElementById('otherLocationText').required = false;
+            }
+        }
+
+        async function fetchBookingsFromCloud() {
+            const cycleId = getCairoDateString();
+            const response = await fetch(`${FIREBASE_URL}/bookings/${cycleId}.json?t=${Date.now()}`);
+            if (!response.ok) throw new Error("فشل الاتصال بالسحابة");
+            const data = await response.json();
+            if (!data) return [];
+            return Object.keys(data).map(key => ({ id: key, ...data[key] }));
+        }
+
+        async function saveBookingToCloud(booking) {
+            const cycleId = getCairoDateString();
+            const response = await fetch(`${FIREBASE_URL}/bookings/${cycleId}.json`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(booking)
+            });
+            return response.ok;
+        }
+
+        async function deleteBookingFromCloud(id) {
+            const cycleId = getCairoDateString();
+            try {
+                await fetch(`${FIREBASE_URL}/bookings/${cycleId}/${id}.json`, { method: 'DELETE' });
+                renderAdminList();
+            } catch (e) {
+                alert("تعذر الحذف، تأكد من اتصال الإنترنت.");
+            }
+        }
+
+        async function handleBooking(e) {
+            e.preventDefault();
+            const btn = document.getElementById('submitBtn');
+            btn.disabled = true;
+            btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> جاري الإرسال للسحابة...';
+
+            const name = document.getElementById('studentName').value.trim();
+            const phone = document.getElementById('studentPhone').value.trim();
+            let pickup = document.getElementById('pickupLocation').value;
+            if (pickup === 'أي مكان تاني') {
+                pickup = 'أخرى: ' + document.getElementById('otherLocationText').value.trim();
+            }
+            const departureTime = document.querySelector('input[name="departureTime"]:checked').value;
+            const returnTime = document.querySelector('input[name="returnTime"]:checked').value;
+
+            const newBooking = {
+                name,
+                phone,
+                pickup,
+                departureTime,
+                returnTime,
+                timestamp: new Date().toISOString()
+            };
+
+            try {
+                const success = await saveBookingToCloud(newBooking);
+                if (success) {
+                    document.getElementById('bookingForm').reset();
+                    document.getElementById('otherLocationWrapper').classList.add('hidden');
+                    document.getElementById('successModal').classList.remove('hidden');
+                    document.getElementById('successModal').classList.add('flex');
+                } else {
+                    alert('حدث خطأ في السيرفر السحابي. تأكد أن قواعد البيانات في Firebase مضبوطة على Test Mode (القراءة والكتابة true).');
+                }
+            } catch (err) {
+                alert('تأكد من اتصالك بالإنترنت وحاول مرة أخرى.');
+            } finally {
+                btn.disabled = false;
+                btn.innerHTML = '<i class="fa-solid fa-paper-plane"></i> تأكيد وإرسال الحجز';
+            }
+        }
+
+        function closeSuccessModal() {
+            document.getElementById('successModal').classList.remove('flex');
+            document.getElementById('successModal').classList.add('hidden');
+        }
+
+        function toggleAdminModal() {
+            const modal = document.getElementById('adminModal');
+            if (modal.classList.contains('hidden')) {
+                modal.classList.remove('hidden');
+                modal.classList.add('flex');
+                document.getElementById('adminPasswordInput').value = '';
+                document.getElementById('adminPasswordInput').focus();
+            } else {
+                modal.classList.remove('flex');
+                modal.classList.add('hidden');
+            }
+        }
+
+        function verifyAdmin(e) {
+            e.preventDefault();
+            const pass = document.getElementById('adminPasswordInput').value;
+            if (pass === '0100') {
+                toggleAdminModal();
+                openAdminDashboard();
+            } else {
+                alert('كلمة المرور غير صحيحة!');
+                document.getElementById('adminPasswordInput').value = '';
+            }
+        }
+
+        async function openAdminDashboard() {
+            const dash = document.getElementById('adminDashboard');
+            dash.classList.remove('hidden');
+            await renderAdminList();
+        }
+
+        function closeAdminDashboard() {
+            document.getElementById('adminDashboard').classList.add('hidden');
+        }
+
+        async function renderAdminList() {
+            const listContainer = document.getElementById('adminBookingsList');
+            listContainer.innerHTML = '<div class="text-center py-8 text-white"><i class="fa-solid fa-spinner fa-spin text-2xl"></i> جاري سحب الحجوزات من السحابة...</div>';
+
+            try {
+                const bookings = await fetchBookingsFromCloud();
+                document.getElementById('totalBookingsCount').innerText = `${bookings.length} حجز`;
+
+                const searchVal = document.getElementById('searchInput').value.toLowerCase();
+                const filterDep = document.getElementById('filterDeparture').value;
+                const filterRet = document.getElementById('filterReturn').value;
+
+                const filtered = bookings.filter(b => {
+                    const matchSearch = b.name.toLowerCase().includes(searchVal) || b.phone.includes(searchVal);
+                    const matchDep = !filterDep || b.departureTime === filterDep;
+                    const matchRet = !filterRet || b.returnTime === filterRet;
+                    return matchSearch && matchDep && matchRet;
+                });
+
+                if (filtered.length === 0) {
+                    listContainer.innerHTML = '<div class="text-center py-12 text-cyan-200 bg-teal-800/40 rounded-2xl border border-teal-700">لا توجد حجوزات مسجلة حتى الآن.</div>';
+                    return;
+                }
+
+                let html = '';
+                filtered.forEach((b, index) => {
+                    html += `
+                        <div class="bg-white rounded-2xl p-4 shadow-md border border-teal-100 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 text-teal-900">
+                            <div class="flex items-center gap-3 w-full sm:w-auto">
+                                <span class="w-8 h-8 rounded-xl bg-teal-100 text-teal-800 font-bold flex items-center justify-center text-xs shrink-0">${index + 1}</span>
+                                <div>
+                                    <h4 class="font-bold text-sm sm:text-base text-teal-950">${b.name}</h4>
+                                    <div class="flex items-center gap-2 mt-1">
+                                        <a href="tel:${b.phone}" class="text-xs bg-teal-50 text-teal-700 px-2 py-0.5 rounded-lg border border-teal-200 hover:bg-teal-100 transition"><i class="fa-solid fa-phone text-[10px]"></i> ${b.phone}</a>
+                                        <a href="https://wa.me/2${b.phone}" target="_blank" class="text-xs bg-emerald-50 text-emerald-700 px-2 py-0.5 rounded-lg border border-emerald-200 hover:bg-emerald-100 transition"><i class="fa-brands fa-whatsapp"></i> واتساب</a>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="flex flex-wrap sm:flex-nowrap items-center gap-2 text-xs w-full sm:w-auto justify-between sm:justify-end pt-2 sm:pt-0 border-t sm:border-0 border-teal-50">
+                                <span class="bg-cyan-50 text-cyan-800 px-2.5 py-1.5 rounded-xl border border-cyan-200"><strong>ركوب:</strong> ${b.pickup}</span>
+                                <span class="bg-purple-50 text-purple-800 px-2.5 py-1.5 rounded-xl border border-purple-200"><strong>مرواح:</strong> ${b.departureTime}</span>
+                                <span class="bg-amber-50 text-amber-800 px-2.5 py-1.5 rounded-xl border border-amber-200"><strong>مجيء:</strong> ${b.returnTime}</span>
+                                <button onclick="deleteBookingFromCloud('${b.id}')" class="text-red-500 hover:text-red-700 p-2 rounded-xl hover:bg-red-50 transition" title="حذف الحجز">
+                                    <i class="fa-solid fa-trash-can"></i>
+                                </button>
+                            </div>
+                        </div>
+                    `;
+                });
+                listContainer.innerHTML = html;
+            } catch (err) {
+                listContainer.innerHTML = '<div class="text-center py-8 text-red-300 bg-red-950/50 rounded-2xl border border-red-800">حدث خطأ في الاتصال بالسحابة. تأكد من صلاحيات Rules في Firebase.</div>';
+            }
+        }
+
+        async function exportToWhatsApp() {
+            const bookings = await fetchBookingsFromCloud();
+            if (bookings.length === 0) {
+                alert('لا توجد حجوزات لتصديرها.');
+                return;
+            }
+            let text = `🚌 *كشف حجوزات شركة الفيروز* 🚌\n📅 تاريخ الدورة: ${getCairoDateString()}\nإجمالي الحجوزات: ${bookings.length}\n---------------------------\n`;
+            bookings.forEach((b, i) => {
+                text += `${i+1}. *${b.name}* | 📞 ${b.phone}\n📍 الركوب: ${b.pickup}\n⏰ المرواح: ${b.departureTime} | 🕒 المجيء: ${b.returnTime}\n---------------------------\n`;
+            });
+            const encoded = encodeURIComponent(text);
+            window.open(`https://api.whatsapp.com/send?text=${encoded}`, '_blank');
+        }
+
+        async function resetDayManually() {
+            const pass = prompt('أدخل كلمة مرور المشرف (0100) لتأكيد تصفير كشف اليوم:');
+            if (pass === '0100') {
+                const cycleId = getCairoDateString();
+                try {
+                    await fetch(`${FIREBASE_URL}/bookings/${cycleId}.json`, { method: 'DELETE' });
+                    alert('تم تصفير كشف اليوم بنجاح من السحابة.');
+                    renderAdminList();
+                } catch (e) {
+                    alert('حدث خطأ أثناء التصفير.');
+                }
+            } else if (pass !== null) {
+                alert('كلمة المرور غير صحيحة!');
+            }
+        }
+    </script>
+</body>
+</html>
+ localStorage.removeItem(`alfayrouz_bookings_${cycleId}`);
+                    alert('تم تصفير كشف اليوم بنجاح.');
+                    renderAdminList();
+                } catch (e) {
+                    alert('حدث خطأ أثناء التصفير.');
+                }
+            } else if (pass !== null) {
+                alert('كلمة المرور غير صحيحة!');
+            }
+        }
+    </script>
+</body>
+</html>
